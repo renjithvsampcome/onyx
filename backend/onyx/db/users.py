@@ -349,3 +349,13 @@ def delete_user_from_db(
         if remaining_user_email != user_to_delete.email
     ]
     write_invited_users(remaining_users)
+
+def get_user_tenant_id(db_session: Session, user: User) -> str | None:
+    """Get the tenant ID for a user.
+    
+    In multi-tenant setups, this would return the actual tenant ID.
+    In single-tenant setups, this returns None.
+    """
+    # For now, return None as this appears to be a single-tenant setup
+    # In a multi-tenant setup, you would query the UserTenantMapping table
+    return None

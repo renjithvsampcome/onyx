@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 from typing import Optional
 
 from fastapi import APIRouter
@@ -17,7 +17,7 @@ from onyx.auth.users import get_user_manager
 from onyx.auth.users import UserManager
 from onyx.configs.app_configs import AUTH_TYPE
 from onyx.configs.constants import AuthType
-from onyx.db.auth import get_user_by_email
+from onyx.db.users import get_user_by_email
 from onyx.db.engine import get_async_session
 from onyx.utils.logger import setup_logger
 
@@ -131,8 +131,8 @@ async def jwt_logout() -> Dict[str, str]:
 async def get_current_user_info(
     async_db_session: AsyncSession = Depends(get_async_session),
     authorization: Optional[str] = Depends(lambda r: r.headers.get("Authorization")),
-) -> Dict[str, any]:
-    """Get current user information from JWT token"""
+) -> Dict[str, Any]:
+    """Get curren   t user information from JWT token"""
     
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(

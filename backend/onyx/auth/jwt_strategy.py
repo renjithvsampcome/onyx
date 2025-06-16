@@ -6,8 +6,7 @@ from fastapi_users.authentication import Strategy
 from fastapi_users.manager import BaseUserManager
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from onyx.auth.jwt_utils import create_access_token
-from onyx.auth.jwt_utils import get_user_from_jwt_token
+from onyx.auth.jwt_utils import get_user_from_jwt_token,create_access_token
 from onyx.configs.app_configs import JWT_ACCESS_TOKEN_EXPIRE_MINUTES
 from onyx.db.engine import get_async_session
 from onyx.db.models import User

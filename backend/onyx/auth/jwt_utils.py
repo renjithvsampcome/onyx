@@ -14,7 +14,6 @@ from fastapi import status
 from jwt import PyJWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from onyx.auth.users import get_user_by_email
 from onyx.configs.app_configs import JWT_ACCESS_TOKEN_EXPIRE_MINUTES
 from onyx.configs.app_configs import JWT_ALGORITHM
 from onyx.configs.app_configs import JWT_AUDIENCE
@@ -179,6 +178,7 @@ async def get_user_from_jwt_token(
 ) -> Optional[User]:
     """Get user from JWT token"""
     try:
+        from onyx.auth.users import get_user_by_email
         payload = await verify_jwt_token(token, "access", async_db_session)
         
         # Get user identifier from token
