@@ -27,12 +27,15 @@ from onyx import __version__
 from onyx.auth.schemas import UserCreate
 from onyx.auth.schemas import UserRead
 from onyx.auth.schemas import UserUpdate
+from onyx.auth.jwt_router import jwt_auth_router
+from onyx.auth.schemas import AuthBackend
 from onyx.auth.users import auth_backend
 from onyx.auth.users import create_onyx_oauth_router
 from onyx.auth.users import fastapi_users
 from onyx.configs.app_configs import APP_API_PREFIX
 from onyx.configs.app_configs import APP_HOST
 from onyx.configs.app_configs import APP_PORT
+from onyx.configs.app_configs import AUTH_BACKEND
 from onyx.configs.app_configs import AUTH_RATE_LIMITING_ENABLED
 from onyx.configs.app_configs import AUTH_TYPE
 from onyx.configs.app_configs import DISABLE_GENERATIVE_AI
@@ -439,6 +442,15 @@ def get_application(lifespan_override: Lifespan | None = None) -> FastAPI:
             application,
             fastapi_users.get_refresh_router(auth_backend),
             prefix="/auth",
+        )
+    
+    if AUTH_TYPE == AuthType.BASIC and AUTH_BACKEND == AuthBackend.JWT:
+        # Include JWT-specific routes when using JWT backend
+        include_auth_router_with_prefix(
+            application,
+            jwt_auth_router,
+            prefix="",
+            tags=["jwt-auth"],
         )
 
     application.add_exception_handler(

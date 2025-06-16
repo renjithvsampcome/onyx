@@ -36,6 +36,7 @@ from fastapi_users import models
 from fastapi_users import schemas
 from fastapi_users import UUIDIDMixin
 from fastapi_users.authentication import AuthenticationBackend
+from fastapi_users.authentication import BearerTransport
 from fastapi_users.authentication import CookieTransport
 from fastapi_users.authentication import RedisStrategy
 from fastapi_users.authentication import Strategy
@@ -60,6 +61,8 @@ from onyx.auth.api_key import get_hashed_api_key_from_request
 from onyx.auth.email_utils import send_forgot_password_email
 from onyx.auth.email_utils import send_user_verification_email
 from onyx.auth.invited_users import get_invited_users
+from onyx.auth.jwt_strategy import JWTStrategy
+from onyx.auth.jwt_utils import get_user_from_jwt_token
 from onyx.auth.schemas import AuthBackend
 from onyx.auth.schemas import UserCreate
 from onyx.auth.schemas import UserRole
@@ -724,6 +727,8 @@ cookie_transport = CookieTransport(
     cookie_name=FASTAPI_USERS_AUTH_COOKIE_NAME,
 )
 
+bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
+
 
 T = TypeVar("T", covariant=True)
 ID = TypeVar("ID", contravariant=True)
@@ -867,6 +872,10 @@ def get_database_strategy(
     )
 
 
+def get_jwt_strategy() -> JWTStrategy:
+    return JWTStrategy()
+
+
 if AUTH_BACKEND == AuthBackend.REDIS:
     auth_backend = AuthenticationBackend(
         name="redis", transport=cookie_transport, get_strategy=get_redis_strategy
@@ -874,6 +883,10 @@ if AUTH_BACKEND == AuthBackend.REDIS:
 elif AUTH_BACKEND == AuthBackend.POSTGRES:
     auth_backend = AuthenticationBackend(
         name="postgres", transport=cookie_transport, get_strategy=get_database_strategy
+    )
+elif AUTH_BACKEND == AuthBackend.JWT:
+    auth_backend = AuthenticationBackend(
+        name="jwt", transport=bearer_transport, get_strategy=get_jwt_strategy
     )
 else:
     raise ValueError(f"Invalid auth backend: {AUTH_BACKEND}")
@@ -1036,6 +1049,13 @@ async def optional_user(
         hashed_api_key = get_hashed_api_key_from_request(request)
         if hashed_api_key:
             user = await fetch_user_for_api_key(hashed_api_key, async_db_session)
+    
+    # check for JWT token if using JWT backend
+    if user is None and AUTH_BACKEND == AuthBackend.JWT:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            user = await get_user_from_jwt_token(token, async_db_session)
 
     return user
 

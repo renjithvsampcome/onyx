@@ -704,7 +704,18 @@ OAUTH_GOOGLE_DRIVE_CLIENT_SECRET = os.environ.get(
 )
 
 # JWT configuration
-JWT_ALGORITHM = "HS256"
+JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM") or "HS256"
+JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or USER_AUTH_SECRET
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    os.environ.get("JWT_ACCESS_TOKEN_EXPIRE_MINUTES") or 30
+)
+JWT_REFRESH_TOKEN_EXPIRE_DAYS = int(
+    os.environ.get("JWT_REFRESH_TOKEN_EXPIRE_DAYS") or 7
+)
+# Optional: External JWT verification
+JWT_PUBLIC_KEY_URL = os.environ.get("JWT_PUBLIC_KEY_URL") or ""
+JWT_ISSUER = os.environ.get("JWT_ISSUER") or ""
+JWT_AUDIENCE = os.environ.get("JWT_AUDIENCE") or ""
 
 #####
 # API Key Configs

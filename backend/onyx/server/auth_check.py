@@ -47,6 +47,11 @@ PUBLIC_ENDPOINT_SPECS = [
     # oauth
     ("/auth/oauth/authorize", {"GET"}),
     ("/auth/oauth/callback", {"GET"}),
+    # jwt auth
+    ("/auth/jwt/login", {"POST"}),
+    ("/auth/jwt/refresh", {"POST"}),
+    ("/auth/jwt/logout", {"POST"}),
+    ("/auth/jwt/me", {"GET"}),
     # anonymous user on cloud
     ("/tenants/anonymous-user", {"POST"}),
     ("/metrics", {"GET"}),  # added by prometheus_fastapi_instrumentator

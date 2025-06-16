@@ -56,3 +56,19 @@ class UserUpdate(schemas.BaseUserUpdate):
 class AuthBackend(str, Enum):
     REDIS = "redis"
     POSTGRES = "postgres"
+    JWT = "jwt"
+
+
+class TokenResponse(schemas.BaseModel):
+    access_token: str
+    refresh_token: str | None = None
+    token_type: str = "bearer"
+
+
+class LoginRequest(schemas.BaseModel):
+    email: str
+    password: str
+
+
+class RefreshTokenRequest(schemas.BaseModel):
+    refresh_token: str
