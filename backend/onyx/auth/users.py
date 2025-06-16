@@ -1044,18 +1044,22 @@ async def optional_user(
     )
     user = await versioned_fetch_user(request, user, async_db_session)
 
-    # check if an API key is present
-    if user is None:
-        hashed_api_key = get_hashed_api_key_from_request(request)
-        if hashed_api_key:
-            user = await fetch_user_for_api_key(hashed_api_key, async_db_session)
-    
     # check for JWT token if using JWT backend
     if user is None and AUTH_BACKEND == AuthBackend.JWT:
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
             user = await get_user_from_jwt_token(token, async_db_session)
+    
+    # check if an API key is present (only if not JWT or no JWT token found)
+    if user is None:
+        try:
+            hashed_api_key = get_hashed_api_key_from_request(request)
+            if hashed_api_key:
+                user = await fetch_user_for_api_key(hashed_api_key, async_db_session)
+        except ValueError:
+            # Invalid API key format, likely a JWT token was passed
+            pass
 
     return user
 

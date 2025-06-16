@@ -13,6 +13,7 @@ from fastapi import HTTPException
 from fastapi import status
 from jwt import PyJWTError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 
 from onyx.configs.app_configs import JWT_ACCESS_TOKEN_EXPIRE_MINUTES
 from onyx.configs.app_configs import JWT_ALGORITHM
@@ -187,7 +188,10 @@ async def get_user_from_jwt_token(
             return None
         
         # Look up user in database
-        user = await get_user_by_email(user_email, async_db_session)
+        user = await async_db_session.execute(
+                    select(User).where(func.lower(User.email) == func.lower(user_email))
+                )
+        user = user.scalars().first()
         
         if not user or not user.is_active:
             return None
